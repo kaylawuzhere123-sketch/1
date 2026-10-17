@@ -453,6 +453,7 @@
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
         }
 
+        /* Collapsible sections or extra widgets */
         .widget-card {
             background: var(--card-bg);
             border: 2px solid var(--border);
@@ -525,6 +526,17 @@
             color: var(--primary);
             font-size: 18px;
             font-weight: 800;
+        }
+
+        .modal textarea {
+            width: 100%;
+            height: 100px;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+            outline: none;
+            resize: vertical;
         }
 
         .modal-actions {
@@ -748,13 +760,16 @@
     </div>
 
     <script>
+        // State Management
         let currentDate = new Date().toISOString().split('T')[0];
         let appData = JSON.parse(localStorage.getItem('usmle_tracker_data') || '{}');
         let settings = JSON.parse(localStorage.getItem('usmle_tracker_settings') || '{"stepDate": "2027-05-15"}');
 
+        // Initialize Date Inputs
         document.getElementById('picker-date').value = currentDate;
         document.getElementById('step-date-input').value = settings.stepDate || '';
 
+        // Quotes Array
         const quotes = [
             "\"Small daily improvements over time lead to stunning results.\"",
             "\"Trust the process. Every UWorld question brings you closer to your white coat.\"",
@@ -771,14 +786,17 @@
             currentDate = dateStr;
             document.getElementById('picker-date').value = dateStr;
             
+            // Format Banner Date
             const d = new Date(dateStr + 'T00:00:00');
             const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
             document.getElementById('banner-date-label').innerText = d.toLocaleDateString('en-US', options).toUpperCase();
             
+            // Pick quote based on date string hash
             let hash = 0;
             for (let i = 0; i < dateStr.length; i++) hash += dateStr.charCodeAt(i);
             document.getElementById('daily-quote').innerText = quotes[hash % quotes.length];
 
+            // Load saved fields
             let dayData = appData[getStorageKey(dateStr)] || {};
             
             document.getElementById('check-videos').checked = !!dayData.videosChecked;
@@ -900,14 +918,16 @@
         }
 
         function updateStreakDisplay() {
+            // Simple streak calculation stub
             let streak = 1;
             let best = 1;
             document.getElementById('current-streak').innerText = streak;
             document.getElementById('best-streak').innerText = best;
         }
 
+        // High yield vignettes
         const vignettes = [
-            "A 45-year-old man with episodic headaches, sweating, and tachycardia. Plasma free metanephrines are elevated. Associated with which germ layer or syndrome? (Answer: Neural crest cells, MEN 2A/2B or VHL/NF1)",
+            "A 45-year-op man with episodic headaches, sweating, and tachycardia. Plasma free metanephrines are elevated. Associated with which germ layer or syndrome? (Answer: Neural crest cells, MEN 2A/2B or VHL/NF1)",
             "A newborn with excessive drooling immediately after birth. Inability to pass a nasogastric tube into the stomach. Diagnosis? (Answer: Esophageal atresia with tracheoesophageal fistula)",
             "Patient presents with ascending symmetric muscle weakness starting in the lower extremities following a Campylobacter infection. Target structure? (Answer: Myelin of peripheral nerves / Schwann cells via molecular mimicry)",
             "Child with recurrent infections, absent thymic shadow on chest X-ray, and hypocalcemia. Genetic microdeletion? (Answer: 22q11 deletion - DiGeorge Syndrome)"
@@ -918,6 +938,7 @@
             document.getElementById('high-yield-output').innerText = vignettes[idx];
         }
 
+        // Reward Box Logic
         function openRewardBox() {
             const modal = document.getElementById('reward-modal');
             modal.classList.add('active');
@@ -927,6 +948,7 @@
             document.getElementById('reward-modal').classList.remove('active');
         }
 
+        // Chart.js setup
         let trendChart = null;
         function initChart() {
             const ctx = document.getElementById('trendChart').getContext('2d');
@@ -958,6 +980,7 @@
 
         function updateChart() {
             if (!trendChart) return;
+            // Gather past 7 days question counts
             let labels = [];
             let dataPoints = [];
             let curr = new Date(currentDate + 'T00:00:00');
@@ -965,7 +988,7 @@
                 let d = new Date(curr);
                 d.setDate(d.getDate() - i);
                 let dateStr = d.toISOString().split('T')[0];
-                labels.push(d.toLocaleDateString('en-US', {weekday: 'short'}));
+                labels.push(d.toLocaleDateString('en-US', {weekday: 'short'});
                 let dayData = appData[getStorageKey(dateStr)] || {};
                 dataPoints.push(dayData.uwQs || 0);
             }
@@ -974,6 +997,7 @@
             trendChart.update();
         }
 
+        // Backup & Restore
         function exportJSON() {
             const exportObj = { data: appData, settings: settings };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
@@ -1014,6 +1038,7 @@
             }
         }
 
+        // Initial Load
         window.onload = () => {
             initChart();
             loadDateData(currentDate);
