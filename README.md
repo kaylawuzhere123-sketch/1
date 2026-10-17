@@ -337,42 +337,4 @@
         }
 
         .task-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .task-title-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .task-checkbox {
-            width: 22px;
-            height: 22px;
-            accent-color: var(--primary);
-            cursor: pointer;
-            border-radius: 6px;
-        }
-
-        .task-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .task-counter-badge {
-            background: var(--primary-lighter);
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 800;
-            border: 1px solid var(--border);
-            min-width: 45px;
-            text-align: center;
-        }
-
-        .task-input {
-            width: 1
+            display: flex
