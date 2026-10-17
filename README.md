@@ -375,4 +375,649 @@
         }
 
         .task-input {
-            width: 1
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 13px;
+            outline: none;
+            background: #fff;
+            color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+
+        .task-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 20, 147, 0.1);
+        }
+
+        .sub-inputs-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .sub-input-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sub-input-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        /* Right Column (Reward & Widgets) */
+        .sidebar-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .reward-card {
+            background: linear-gradient(145deg, #ffffff 0%, #fff0f5 100%);
+            border: 2px dashed var(--primary-light);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 4px 15px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .reward-card h3 {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .reward-card p {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .reward-box-display {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            width: 100%;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .widget-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px;
+            box-shadow: 0 4px 15px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .widget-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .analytics-container {
+            position: relative;
+            height: 180px;
+            width: 100%;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(74, 46, 53, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: white;
+            border-radius: var(--radius);
+            border: 2px solid var(--border);
+            width: 90%;
+            max-width: 450px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transform: translateY(20px);
+            transition: transform 0.2s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal h3 {
+            color: var(--primary);
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-top">
+                <div class="title-area">
+                    <h1>🌸 USMLE STEP 1 Daily Tracker</h1>
+                    <p>Bubblegum Pink Edition • Stay Consistent & Crush It</p>
+                </div>
+                <div class="header-actions">
+                    <div class="countdown-card">
+                        <span style="font-size: 18px;">🎯</span>
+                        <div class="countdown-info">
+                            <span class="countdown-label">Exam Countdown</span>
+                            <span class="countdown-value" id="countdown-text">Loading...</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="exportJSON()">Backup JSON</button>
+                    <button class="btn" style="background:#ff6b81;" onclick="triggerRestore()">Restore</button>
+                    <input type="file" id="restore-file" style="display:none" onchange="importJSON(event)">
+                </div>
+            </div>
+            
+            <!-- STEP Date Setting Bar -->
+            <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 12px; flex-wrap: wrap; gap: 10px;">
+                <div class="date-input-wrapper">
+                    <span>📅 Target STEP Exam Date:</span>
+                    <input type="date" id="step-date-input" onchange="updateStepDate(this.value)">
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;" id="date-status-msg">
+                    Set your exam date to keep your countdown accurate!
+                </div>
+            </div>
+        </header>
+
+        <!-- Motivational Banner -->
+        <div class="banner">
+            <div class="banner-content">
+                <span class="date-badge" id="banner-date-label">SAT, OCT 17, 2026</span>
+                <h2 id="daily-quote">"Small daily improvements over time lead to stunning results."</h2>
+            </div>
+            <div class="streaks-box">
+                <div class="streak-item">
+                    <div class="number" id="current-streak">1</div>
+                    <div class="label">Day Streak 🔥</div>
+                </div>
+                <div class="streak-item">
+                    <div class="number" id="best-streak">1</div>
+                    <div class="label">Best Streak 🏆</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Navigation Bar -->
+        <div class="date-nav">
+            <div class="date-nav-controls">
+                <button class="icon-btn" onclick="changeDate(-1)">❮</button>
+                <div class="date-display-box">
+                    <span>📅</span>
+                    <input type="date" id="picker-date" onchange="selectDate(this.value)">
+                </div>
+                <button class="icon-btn" onclick="changeDate(1)">❯</button>
+            </div>
+            <button class="btn btn-secondary" onclick="jumpToToday()">Jump to Today</button>
+        </div>
+
+        <!-- Main Layout Grid -->
+        <div class="main-grid">
+            
+            <!-- Left Tasks Column -->
+            <div class="tasks-column">
+
+                <!-- Task 1: Watch Videos -->
+                <div class="task-card" id="card-videos">
+                    <div class="task-header">
+                        <div class="task-title-group">
+                            <input type="checkbox" class="task-checkbox" id="check-videos" onchange="saveData()">
+                            <span class="task-title">🎬 Watch STEP Videos</span>
+                        </div>
+                        <div class="task-counter-badge" id="badge-videos">0</div>
+                    </div>
+                    <input type="text" class="task-input" id="input-videos-topic" placeholder="Enter video topics, Sketchy/Pathoma modules..." oninput="saveData()">
+                    <div class="sub-inputs-row">
+                        <div class="sub-input-group">
+                            <label>Boards & Beyond Count</label>
+                            <input type="number" class="task-input" id="input-bnb" min="0" value="0" oninput="updateCounts(); saveData()">
+                        </div>
+                        <div class="sub-input-group">
+                            <label>First Aid / Sketchy Count</label>
+                            <input type="number" class="task-input" id="input-fa" min="0" value="0" oninput="updateCounts(); saveData()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task 2: UWorld Blocks -->
+                <div class="task-card" id="card-uworld">
+                    <div class="task-header">
+                        <div class="task-title-group">
+                            <input type="checkbox" class="task-checkbox" id="check-uworld" onchange="saveData()">
+                            <span class="task-title">📝 Do UWorld Blocks</span>
+                        </div>
+                        <div class="task-counter-badge" id="badge-uworld">0 Blocks</div>
+                    </div>
+                    <div class="sub-inputs-row">
+                        <div class="sub-input-group">
+                            <label>Blocks Completed</label>
+                            <input type="number" class="task-input" id="input-uw-blocks" min="0" value="0" oninput="updateCounts(); saveData()">
+                        </div>
+                        <div class="sub-input-group">
+                            <label>Total Questions Done</label>
+                            <input type="number" class="task-input" id="input-uw-qs" min="0" value="0" oninput="saveData()">
+                        </div>
+                    </div>
+                    <input type="text" class="task-input" id="input-uw-topics" placeholder="Enter block percentages or main subjects..." oninput="saveData()">
+                </div>
+
+                <!-- Task 3: Anki Reviews -->
+                <div class="task-card" id="card-anki">
+                    <div class="task-header">
+                        <div class="task-title-group">
+                            <input type="checkbox" class="task-checkbox" id="check-anki" onchange="saveData()">
+                            <span class="task-title">🗂️ Complete Anki Reviews</span>
+                        </div>
+                        <div class="task-counter-badge" id="badge-anki">0 Cards</div>
+                    </div>
+                    <div class="sub-inputs-row">
+                        <div class="sub-input-group">
+                            <label>Cards Reviewed</label>
+                            <input type="number" class="task-input" id="input-anki-cards" min="0" value="0" oninput="updateCounts(); saveData()">
+                        </div>
+                        <div class="sub-input-group">
+                            <label>Anki Backlog Remaining</label>
+                            <input type="number" class="task-input" id="input-anki-backlog" min="0" value="0" oninput="saveData()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task 4: Practice Exam / NBME -->
+                <div class="task-card" id="card-nbme">
+                    <div class="task-header">
+                        <div class="task-title-group">
+                            <input type="checkbox" class="task-checkbox" id="check-nbme" onchange="saveData()">
+                            <span class="task-title">📊 NBME Practice Exam / Assessment</span>
+                        </div>
+                        <div class="task-counter-badge" id="badge-nbme-status">Off</div>
+                    </div>
+                    <div class="sub-inputs-row">
+                        <div class="sub-input-group">
+                            <label>NBME Form / Exam Name</label>
+                            <input type="text" class="task-input" id="input-nbme-name" placeholder="e.g., NBME Form 30" oninput="saveData()">
+                        </div>
+                        <div class="sub-input-group">
+                            <label>Score / Percentage</label>
+                            <input type="number" class="task-input" id="input-nbme-score" placeholder="e.g., 225 or 78%" oninput="saveData()">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Sidebar Column -->
+            <div class="sidebar-column">
+
+                <!-- Reward Mystery Box -->
+                <div class="reward-card">
+                    <h3>🎁 Study Reward Mystery Box</h3>
+                    <p>Earned based on how well you complete today's core tasks!</p>
+                    <div class="reward-box-display" id="reward-display">
+                        🔒 Complete tasks to unlock your daily treat!
+                    </div>
+                    <button class="btn" style="width:100%;" onclick="openRewardBox()">✨ Open Reward Box</button>
+                </div>
+
+                <!-- Quick Diagnostic / Incorrects Log -->
+                <div class="widget-card">
+                    <div class="widget-title">
+                        <span>🩺 High-Yield Diagnosis Generator</span>
+                        <button class="btn btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="generateHighYield()">Roll</button>
+                    </div>
+                    <div id="high-yield-output" style="font-size: 13px; color: var(--text-muted); background: var(--primary-lighter); padding: 10px; border-radius: 10px; min-height: 50px;">
+                        Click Roll to generate a random high-yield vignette concept to test your recall!
+                    </div>
+                </div>
+
+                <!-- Mini Analytics Chart -->
+                <div class="widget-card">
+                    <div class="widget-title">
+                        <span>📈 Question Trend (Last 7 Days)</span>
+                    </div>
+                    <div class="analytics-container">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Reward Modal -->
+    <div class="modal-overlay" id="reward-modal">
+        <div class="modal">
+            <h3 id="modal-reward-title">🎉 Mystery Box Unlocked!</h3>
+            <p id="modal-reward-desc" style="font-size: 13px; color: var(--text-muted);">Here is your reward for your hard work today:</p>
+            <div id="modal-reward-content" style="background: var(--primary-lighter); padding: 14px; border-radius: 12px; font-weight: 700; color: var(--primary); text-align: center;">
+                A guilt-free online shopping session or extra rest evening!
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal()">Awesome!</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date().toISOString().split('T')[0];
+        let appData = JSON.parse(localStorage.getItem('usmle_tracker_data') || '{}');
+        let settings = JSON.parse(localStorage.getItem('usmle_tracker_settings') || '{"stepDate": "2027-05-15"}');
+
+        document.getElementById('picker-date').value = currentDate;
+        document.getElementById('step-date-input').value = settings.stepDate || '';
+
+        const quotes = [
+            "\"Small daily improvements over time lead to stunning results.\"",
+            "\"Trust the process. Every UWorld question brings you closer to your white coat.\"",
+            "\"Hard work beats talent when talent doesn't work hard.\"",
+            "\"You didn't come this far only to come this far. Keep pushing!\"",
+            "\"Master the fundamentals. The rest will follow naturally.\""
+        ];
+
+        function getStorageKey(dateStr) {
+            return 'day_' + dateStr;
+        }
+
+        function loadDateData(dateStr) {
+            currentDate = dateStr;
+            document.getElementById('picker-date').value = dateStr;
+            
+            const d = new Date(dateStr + 'T00:00:00');
+            const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+            document.getElementById('banner-date-label').innerText = d.toLocaleDateString('en-US', options).toUpperCase();
+            
+            let hash = 0;
+            for (let i = 0; i < dateStr.length; i++) hash += dateStr.charCodeAt(i);
+            document.getElementById('daily-quote').innerText = quotes[hash % quotes.length];
+
+            let dayData = appData[getStorageKey(dateStr)] || {};
+            
+            document.getElementById('check-videos').checked = !!dayData.videosChecked;
+            document.getElementById('input-videos-topic').value = dayData.videosTopic || '';
+            document.getElementById('input-bnb').value = dayData.bnbCount || 0;
+            document.getElementById('input-fa').value = dayData.faCount || 0;
+
+            document.getElementById('check-uworld').checked = !!dayData.uworldChecked;
+            document.getElementById('input-uw-blocks').value = dayData.uwBlocks || 0;
+            document.getElementById('input-uw-qs').value = dayData.uwQs || 0;
+            document.getElementById('input-uw-topics').value = dayData.uwTopics || '';
+
+            document.getElementById('check-anki').checked = !!dayData.ankiChecked;
+            document.getElementById('input-anki-cards').value = dayData.ankiCards || 0;
+            document.getElementById('input-anki-backlog').value = dayData.ankiBacklog || 0;
+
+            document.getElementById('check-nbme').checked = !!dayData.nbmeChecked;
+            document.getElementById('input-nbme-name').value = dayData.nbmeName || '';
+            document.getElementById('input-nbme-score').value = dayData.nbmeScore || '';
+
+            updateCounts();
+            updateStreakDisplay();
+            updateCountdown();
+            updateChart();
+        }
+
+        function saveData() {
+            let dayData = {
+                videosChecked: document.getElementById('check-videos').checked,
+                videosTopic: document.getElementById('input-videos-topic').value,
+                bnbCount: parseInt(document.getElementById('input-bnb').value) || 0,
+                faCount: parseInt(document.getElementById('input-fa').value) || 0,
+                
+                uworldChecked: document.getElementById('check-uworld').checked,
+                uwBlocks: parseInt(document.getElementById('input-uw-blocks').value) || 0,
+                uwQs: parseInt(document.getElementById('input-uw-qs').value) || 0,
+                uwTopics: document.getElementById('input-uw-topics').value,
+
+                ankiChecked: document.getElementById('check-anki').checked,
+                ankiCards: parseInt(document.getElementById('input-anki-cards').value) || 0,
+                ankiBacklog: parseInt(document.getElementById('input-anki-backlog').value) || 0,
+
+                nbmeChecked: document.getElementById('check-nbme').checked,
+                nbmeName: document.getElementById('input-nbme-name').value,
+                nbmeScore: document.getElementById('input-nbme-score').value
+            };
+
+            appData[getStorageKey(currentDate)] = dayData;
+            localStorage.setItem('usmle_tracker_data', JSON.stringify(appData));
+            
+            updateCounts();
+            updateStreakDisplay();
+            updateChart();
+        }
+
+        function updateStepDate(val) {
+            settings.stepDate = val;
+            localStorage.setItem('usmle_tracker_settings', JSON.stringify(settings));
+            updateCountdown();
+        }
+
+        function updateCountdown() {
+            const countdownEl = document.getElementById('countdown-text');
+            const msgEl = document.getElementById('date-status-msg');
+            if (!settings.stepDate) {
+                countdownEl.innerText = "Set Date ➔";
+                msgEl.innerText = "Please select your target STEP date above.";
+                return;
+            }
+            const target = new Date(settings.stepDate + 'T00:00:00');
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const diffTime = target - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays > 0) {
+                countdownEl.innerText = `${diffDays} Days Left`;
+                msgEl.innerText = `Target Date: ${target.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}`;
+            } else if (diffDays === 0) {
+                countdownEl.innerText = "Exam Day is Here! 🥳";
+                msgEl.innerText = "Crush it today!";
+            } else {
+                countdownEl.innerText = "Exam Passed";
+                msgEl.innerText = "Hope you crushed it!";
+            }
+        }
+
+        function updateCounts() {
+            let bnb = parseInt(document.getElementById('input-bnb').value) || 0;
+            let fa = parseInt(document.getElementById('input-fa').value) || 0;
+            document.getElementById('badge-videos').innerText = bnb + fa;
+            document.getElementById('card-videos').classList.toggle('completed', document.getElementById('check-videos').checked);
+
+            let blocks = parseInt(document.getElementById('input-uw-blocks').value) || 0;
+            document.getElementById('badge-uworld').innerText = `${blocks} Block${blocks === 1 ? '' : 's'}`;
+            document.getElementById('card-uworld').classList.toggle('completed', document.getElementById('check-uworld').checked);
+
+            let cards = parseInt(document.getElementById('input-anki-cards').value) || 0;
+            document.getElementById('badge-anki').innerText = `${cards} Cards`;
+            document.getElementById('card-anki').classList.toggle('completed', document.getElementById('check-anki').checked);
+
+            let nbmeChecked = document.getElementById('check-nbme').checked;
+            document.getElementById('badge-nbme-status').innerText = nbmeChecked ? 'Done' : 'Off';
+            document.getElementById('card-nbme').classList.toggle('completed', nbmeChecked);
+        }
+
+        function changeDate(delta) {
+            let d = new Date(currentDate + 'T00:00:00');
+            d.setDate(d.getDate() + delta);
+            loadDateData(d.toISOString().split('T')[0]);
+        }
+
+        function selectDate(val) {
+            if (val) loadDateData(val);
+        }
+
+        function jumpToToday() {
+            loadDateData(new Date().toISOString().split('T')[0]);
+        }
+
+        function updateStreakDisplay() {
+            let streak = 1;
+            let best = 1;
+            document.getElementById('current-streak').innerText = streak;
+            document.getElementById('best-streak').innerText = best;
+        }
+
+        const vignettes = [
+            "A 45-year-old man with episodic headaches, sweating, and tachycardia. Plasma free metanephrines are elevated. Associated with which germ layer or syndrome? (Answer: Neural crest cells, MEN 2A/2B or VHL/NF1)",
+            "A newborn with excessive drooling immediately after birth. Inability to pass a nasogastric tube into the stomach. Diagnosis? (Answer: Esophageal atresia with tracheoesophageal fistula)",
+            "Patient presents with ascending symmetric muscle weakness starting in the lower extremities following a Campylobacter infection. Target structure? (Answer: Myelin of peripheral nerves / Schwann cells via molecular mimicry)",
+            "Child with recurrent infections, absent thymic shadow on chest X-ray, and hypocalcemia. Genetic microdeletion? (Answer: 22q11 deletion - DiGeorge Syndrome)"
+        ];
+
+        function generateHighYield() {
+            let idx = Math.floor(Math.random() * vignettes.length);
+            document.getElementById('high-yield-output').innerText = vignettes[idx];
+        }
+
+        function openRewardBox() {
+            const modal = document.getElementById('reward-modal');
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('reward-modal').classList.remove('active');
+        }
+
+        let trendChart = null;
+        function initChart() {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['6d ago', '5d ago', '4d ago', '3d ago', '2d ago', 'Yesterday', 'Today'],
+                    datasets: [{
+                        label: 'UWorld Questions',
+                        data: [0, 0, 0, 0, 0, 0, 0],
+                        borderColor: '#ff1493',
+                        backgroundColor: 'rgba(255, 20, 147, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#ffe4e1' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            if (!trendChart) return;
+            let labels = [];
+            let dataPoints = [];
+            let curr = new Date(currentDate + 'T00:00:00');
+            for (let i = 6; i >= 0; i--) {
+                let d = new Date(curr);
+                d.setDate(d.getDate() - i);
+                let dateStr = d.toISOString().split('T')[0];
+                labels.push(d.toLocaleDateString('en-US', {weekday: 'short'}));
+                let dayData = appData[getStorageKey(dateStr)] || {};
+                dataPoints.push(dayData.uwQs || 0);
+            }
+            trendChart.data.labels = labels;
+            trendChart.data.datasets[0].data = dataPoints;
+            trendChart.update();
+        }
+
+        function exportJSON() {
+            const exportObj = { data: appData, settings: settings };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `usmle_tracker_backup_${currentDate}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function triggerRestore() {
+            document.getElementById('restore-file').click();
+        }
+
+        function importJSON(event) {
+            const fileReader = new FileReader();
+            if (event.target.files[0]) {
+                fileReader.readAsText(event.target.files[0], "UTF-8");
+                fileReader.onload = (e) => {
+                    try {
+                        const parsed = JSON.parse(e.target.result);
+                        if (parsed.data) {
+                            appData = parsed.data;
+                            localStorage.setItem('usmle_tracker_data', JSON.stringify(appData));
+                        }
+                        if (parsed.settings) {
+                            settings = parsed.settings;
+                            localStorage.setItem('usmle_tracker_settings', JSON.stringify(settings));
+                            document.getElementById('step-date-input').value = settings.stepDate || '';
+                        }
+                        loadDateData(currentDate);
+                        alert("Data successfully restored!");
+                    } catch (err) {
+                        alert("Invalid backup file.");
+                    }
+                };
+            }
+        }
+
+        window.onload = () => {
+            initChart();
+            loadDateData(currentDate);
+        };
+    </script>
+</body>
+</html>
